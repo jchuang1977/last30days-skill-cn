@@ -106,6 +106,16 @@ class TestGetCrawlerStatus(unittest.TestCase):
         finally:
             shutil.rmtree(cookie_dir, ignore_errors=True)
 
+    def test_cookie_directory_can_be_set_for_a_persistent_volume(self):
+        cookie_dir = Path(tempfile.mkdtemp())
+        try:
+            with patch.dict(os.environ, {"LAST30DAYS_COOKIE_DIR": str(cookie_dir)}, clear=False):
+                importlib.reload(crawler_bridge)
+                self.assertEqual(crawler_bridge.COOKIE_DIR, cookie_dir)
+        finally:
+            importlib.reload(crawler_bridge)
+            shutil.rmtree(cookie_dir, ignore_errors=True)
+
 
 class TestCleanHtml(unittest.TestCase):
     def test_clean_html(self):

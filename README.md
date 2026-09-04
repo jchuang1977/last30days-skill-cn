@@ -437,7 +437,7 @@ last30days-skill-cn/
 
 ## 🖥️ Web 研究工作台（Docker）
 
-此项目附带一个面向内部非商业研究的小团队 Web 工作台。它保留现有 CLI 的搜索、评分和报告流程；每次研究在独立目录运行，因此并发任务不会互相覆盖报告。Web 版本默认关闭浏览器爬虫（`LAST30DAYS_DISABLE_BROWSER=1`），以使用公开接口和搜索兜底为主。
+此项目附带一个面向内部非商业研究的小团队 Web 工作台。它保留现有 CLI 的搜索、评分和报告流程；每次研究在独立目录运行，因此并发任务不会互相覆盖报告。Docker 映像已内建 `jieba`、Playwright、Chromium 及其系统依赖，Web 版本默认启用浏览器爬虫。
 
 ### 本机启动
 
@@ -459,7 +459,7 @@ PowerShell 可用 `Copy-Item .env.example .env` 建立配置文件。
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 ```
 
-Caddy 会申请 HTTPS 并把流量转发到应用。请勿将 `.env` 提交到 Git；平台 API key 只应存于部署环境的 secret 或 `.env` 中。
+Caddy 会申请 HTTPS 并把流量转发到应用。请勿将 `.env` 提交到 Git；平台 API key 只应存于部署环境的 secret 或 `.env` 中。浏览器登入 Cookie 会保存到 `/data/browser_cookies`，因此 Docker volume 会在容器重启后保留登入态。将 `LAST30DAYS_DISABLE_BROWSER=1` 写入 `.env` 可临时停用浏览器爬虫，只保留公开 API 与搜索兜底。
 
 工作台提供共享密码登录、CSRF 保护、任务进度、取消、30 天历史以及 JSON、Markdown 和独立 HTML 报告下载。它不提供 LLM 对话或公开采集 API；使用前仍须遵守各平台条款和本项目的研究用途限制。
 

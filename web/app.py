@@ -225,7 +225,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             manager.store.initialize()
         except OSError as exc:
             return JSONResponse({"status": "error", "detail": str(exc)}, status_code=503)
-        return {"status": "ok", "browser": "disabled", "workers": settings.max_workers}
+        disabled = os.environ.get("LAST30DAYS_DISABLE_BROWSER", "0").lower() in {"1", "true", "yes", "on"}
+        return {"status": "ok", "browser": "disabled" if disabled else "enabled", "workers": settings.max_workers}
 
     return app
 

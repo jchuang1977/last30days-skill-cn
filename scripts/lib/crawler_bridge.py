@@ -28,11 +28,22 @@ from datetime import datetime
 
 from . import dates
 
-COOKIE_DIR = Path.home() / ".config" / "last30days-cn" / "browser_cookies"
 _playwright_available: Optional[bool] = None
 _BROWSER_PATH_ENV = "LAST30DAYS_BROWSER_PATH"
 _BROWSER_CHANNEL_ENV = "LAST30DAYS_BROWSER_CHANNEL"
 _DISABLE_BROWSER_ENV = "LAST30DAYS_DISABLE_BROWSER"
+_COOKIE_DIR_ENV = "LAST30DAYS_COOKIE_DIR"
+
+
+def _resolve_cookie_dir() -> Path:
+    """Return a persistent, optionally container-mounted cookie directory."""
+    configured = os.environ.get(_COOKIE_DIR_ENV, "").strip()
+    if configured:
+        return Path(os.path.expanduser(configured))
+    return Path.home() / ".config" / "last30days-cn" / "browser_cookies"
+
+
+COOKIE_DIR = _resolve_cookie_dir()
 
 _DESKTOP_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

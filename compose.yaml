@@ -5,8 +5,10 @@ services:
     env_file: ${ENV_FILE:-.env}
     environment:
       LAST30_WEB_DATA_DIR: /data
-      LAST30DAYS_DISABLE_BROWSER: "1"
+      LAST30DAYS_DISABLE_BROWSER: ${LAST30DAYS_DISABLE_BROWSER:-0}
       SESSION_HTTPS_ONLY: "0"
+    init: true
+    shm_size: 1gb
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"
     volumes:

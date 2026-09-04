@@ -228,7 +228,8 @@ class JobManager:
             "LAST30DAYS_OUTPUT_DIR": str(output_dir),
             "LAST30DAYS_CACHE_DIR": str(self.settings.cache_dir),
             "LAST30DAYS_CN_CONFIG_DIR": "",
-            "LAST30DAYS_DISABLE_BROWSER": "1",
+            "LAST30DAYS_COOKIE_DIR": str(self.settings.data_dir / "browser_cookies"),
+            "LAST30DAYS_DISABLE_BROWSER": env.get("LAST30DAYS_DISABLE_BROWSER", "0"),
         })
         command = self._command(job)
         stderr_lines: list[str] = []

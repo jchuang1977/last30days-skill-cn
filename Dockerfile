@@ -2,15 +2,17 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    LAST30DAYS_DISABLE_BROWSER=1 \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    LAST30DAYS_DISABLE_BROWSER=0 \
     LAST30_WEB_DATA_DIR=/data
 
 WORKDIR /app
 RUN addgroup --system app && adduser --system --ingroup app app
 COPY requirements-web.txt ./
-RUN pip install --no-cache-dir -r requirements-web.txt
+RUN pip install --no-cache-dir -r requirements-web.txt jieba playwright \
+    && python -m playwright install --with-deps chromium
 COPY --chown=app:app . .
-RUN mkdir -p /data && chown app:app /data
+RUN mkdir -p /data /ms-playwright && chown -R app:app /data /ms-playwright
 
 USER app
 EXPOSE 8000
