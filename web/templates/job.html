@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-heading compact"><a href="/" class="back">← 新研究</a><p class="eyebrow">RESEARCH JOB</p><h1>{{ job.topic }}</h1><p>{{ job.as_of }} 為截止日 · 回溯 {{ job.days }} 天 · {{ job.depth }} 模式</p></section>
+<section class="panel job-state" id="job-state" data-job-id="{{ job.id }}" data-status="{{ job.status }}">
+  <div><span class="status {{ job.status }}" id="status-label">{{ job.status }}</span><strong id="status-message">{{ job.message }}</strong></div>
+  <div class="progress"><span id="progress-bar" style="width: {{ job.progress }}%"></span></div><small id="progress-text">{{ job.progress }}%</small>
+  {% if job.status not in ['succeeded', 'partial', 'failed', 'cancelled'] %}<button id="cancel" class="secondary">取消研究</button>{% endif %}
+</section>
+{% if job.error %}<section class="error-detail"><strong>來源或程序訊息</strong><pre>{{ job.error }}</pre></section>{% endif %}
+{% if job.report %}
+<section class="report-actions"><a href="/api/jobs/{{ job.id }}/artifacts/json">JSON</a><a href="/api/jobs/{{ job.id }}/artifacts/md">Markdown</a><a href="/api/jobs/{{ job.id }}/artifacts/html">獨立 HTML 報告</a><label>篩選來源 <select id="source-filter"><option value="">全部</option>{% for key, label in source_labels.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label></section>
+<section class="metrics"><article><b>{{ job.report.topic }}</b><span>研究主題</span></article><article><b>{{ job.report.range.from }}<br>→ {{ job.report.range.to }}</b><span>資料時間窗</span></article><article><b>{{ '快取' if job.report.from_cache else '即時' }}</b><span>資料狀態</span></article><article><b>{{ job.status }}</b><span>任務狀態</span></article></section>
+{% if job.report.clusters %}<section class="panel"><h2>跨平台聚合熱點</h2><div class="clusters">{% for cluster in job.report.clusters %}<article><strong>{{ cluster.label or cluster.title or '跨平台話題' }}</strong><p>{{ cluster.summary or cluster.items|length ~ ' 筆關聯結果' }}</p></article>{% endfor %}</div></section>{% endif %}
+<section class="result-list"><h2>研究結果</h2>{% for source, label in source_labels.items() %}{% set items = job.report.get(source, []) %}{% set error = job.report.get(source ~ '_error') %}<div class="result-source" data-source="{{ source }}"><h3>{{ label }} <small>{{ items|length }} 筆</small></h3>{% if error %}<p class="source-error">{{ error }}</p>{% endif %}{% for item in items %}<article class="result-card"><div><span class="source-tag">{{ label }}</span><span class="score">{{ item.get('score', 0) }}</span></div><a href="{{ item.get('url', '#')|safe_href }}" target="_blank" rel="noopener noreferrer">{{ item.get('title') or item.get('text') or item.get('desc') or '查看原始內容' }}</a><p>{{ item.get('excerpt') or item.get('description') or item.get('snippet') or item.get('abstract') or item.get('desc') or '' }}</p><small>{{ item.get('date') or '日期未確認' }} · {{ item.get('why_relevant') or '依相關性、時效性與互動度排序' }}</small></article>{% endfor %}</div>{% endfor %}</section>
+{% endif %}
+<script>
+const state = document.getElementById('job-state'); const token = '{{ csrf_token }}';
+function update(job) { document.getElementById('status-label').className = 'status ' + job.status; document.getElementById('status-label').textContent = job.status; document.getElementById('status-message').textContent = job.message; document.getElementById('progress-bar').style.width = job.progress + '%'; document.getElementById('progress-text').textContent = job.progress + '%'; if (['succeeded','partial','failed','cancelled'].includes(job.status)) window.location.reload(); }
+if (!['succeeded','partial','failed','cancelled'].includes(state.dataset.status)) { const stream = new EventSource('/api/jobs/' + state.dataset.jobId + '/events'); stream.addEventListener('update', event => update(JSON.parse(event.data))); }
+const cancel = document.getElementById('cancel'); if (cancel) cancel.addEventListener('click', async () => { cancel.disabled = true; await fetch('/api/jobs/' + state.dataset.jobId + '/cancel', {method:'POST',headers:{'X-CSRF-Token':token}}); });
+const filter = document.getElementById('source-filter'); if (filter) filter.addEventListener('change', () => document.querySelectorAll('.result-source').forEach(item => item.hidden = filter.value && item.dataset.source !== filter.value));
+</script>
+{% endblock %}

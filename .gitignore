@@ -5,8 +5,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv/
+.test-tmp/
 mise.toml
 *.egg-info/
 dist/
 build/
 .env
+data/

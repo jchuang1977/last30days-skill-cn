@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">30-DAY ARCHIVE</p><h1>研究歷史</h1><p>報告及其原始證據會在建立後保留 30 天。</p></section>
+<section class="panel history-list">
+{% if jobs %}{% for job in jobs %}<a href="/jobs/{{ job.id }}" class="history-row"><span class="status {{ job.status }}">{{ job.status }}</span><strong>{{ job.topic }}</strong><span>{{ job.created_at[:10] }}</span><span>{{ job.message }}</span></a>{% endfor %}{% else %}<p>尚無研究紀錄。</p>{% endif %}
+</section>
+{% endblock %}

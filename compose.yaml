@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    image: last30days-cn-web:local
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      LAST30_WEB_DATA_DIR: /data
+      LAST30DAYS_DISABLE_BROWSER: "1"
+      SESSION_HTTPS_ONLY: "0"
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
+    volumes:
+      - last30days-data:/data
+    restart: unless-stopped
+
+volumes:
+  last30days-data:

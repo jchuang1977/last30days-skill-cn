@@ -1,0 +1,23 @@
+services:
+  app:
+    environment:
+      SESSION_HTTPS_ONLY: "1"
+  caddy:
+    image: caddy:2.8-alpine
+    depends_on:
+      app:
+        condition: service_started
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:

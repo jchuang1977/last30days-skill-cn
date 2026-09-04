@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">CHINESE PLATFORM RESEARCH</p>
+  <h1>把近 30 天的<br><em>真實討論</em>收進一份報告。</h1>
+  <p>跨微博、小紅書、B站、知乎、抖音、微信、百度與頭條檢索；每一筆結果保留原始連結和來源狀態。</p>
+</section>
+<section class="panel">
+  <form id="research-form">
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+    <label class="wide">研究主題<textarea name="topic" maxlength="200" required placeholder="例如：具身智能在中國市場的近期討論"></textarea></label>
+    <div class="form-grid">
+      <label>回溯天數<input name="days" type="number" value="30" min="1" max="30" required></label>
+      <label>截止日期<input name="as_of" type="date" value="{{ today }}"></label>
+      <label>研究模式<select name="depth"><option value="quick">快速</option><option value="default" selected>標準</option><option value="deep">深度</option></select></label>
+      <label class="check-label"><input name="refresh" type="checkbox"> 強制刷新，略過快取</label>
+    </div>
+    <fieldset><legend>資料來源 <small>不勾選時依研究主題自動選擇</small></legend>
+      <div class="source-grid">{% for key, label in sources %}<label class="source-choice"><input type="checkbox" name="sources" value="{{ key }}">{{ label }}</label>{% endfor %}</div>
+    </fieldset>
+    <p class="form-note">預設使用 24 小時內的快取結果；勾選「強制刷新」才會重新搜尋。</p>
+    <p id="form-error" class="error" hidden></p>
+    <button class="primary" type="submit">開始研究</button>
+  </form>
+</section>
+<script>
+document.getElementById('research-form').addEventListener('submit', async (event) => {
+  event.preventDefault(); const form = event.currentTarget; const values = new FormData(form);
+  const body = {topic: values.get('topic'), days: Number(values.get('days')), as_of: values.get('as_of'), depth: values.get('depth'), sources: values.getAll('sources'), refresh: values.get('refresh') === 'on'};
+  const button = form.querySelector('button[type=submit]'); button.disabled = true; button.textContent = '建立任務中…';
+  const response = await fetch('/api/jobs', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.getElementById('csrf-token').value}, body: JSON.stringify(body)});
+  if (response.ok) { window.location.assign('/jobs/' + (await response.json()).id); return; }
+  const error = await response.json(); document.getElementById('form-error').textContent = error.detail || '建立任務失敗'; document.getElementById('form-error').hidden = false; button.disabled = false; button.textContent = '開始研究';
+});
+</script>
+{% endblock %}

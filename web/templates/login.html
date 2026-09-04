@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}登入｜last30days-cn{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <p class="eyebrow">PRIVATE RESEARCH WORKSPACE</p>
+  <h1>近 30 天，<br>有根據的中文網路研究。</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if configured %}
+  <form method="post" action="/login">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>共享密碼<input type="password" name="password" required autofocus></label>
+    <button class="primary" type="submit">進入工作台</button>
+  </form>
+  {% else %}<p class="notice">請先在部署環境設定 <code>APP_PASSWORD</code>。</p>{% endif %}
+</section>
+{% endblock %}

@@ -435,6 +435,36 @@ last30days-skill-cn/
 
 ---
 
+## 🖥️ Web 研究工作台（Docker）
+
+此项目附带一个面向内部非商业研究的小团队 Web 工作台。它保留现有 CLI 的搜索、评分和报告流程；每次研究在独立目录运行，因此并发任务不会互相覆盖报告。Web 版本默认关闭浏览器爬虫（`LAST30DAYS_DISABLE_BROWSER=1`），以使用公开接口和搜索兜底为主。
+
+### 本机启动
+
+```bash
+cp .env.example .env
+# 编辑 .env，至少设置 APP_PASSWORD 与 SESSION_SECRET
+docker compose up --build
+```
+
+PowerShell 可用 `Copy-Item .env.example .env` 建立配置文件。
+
+然后打开 `http://127.0.0.1:8000`。数据、缓存和最近 30 天的研究历史保存在 Docker 的 `last30days-data` volume；备份时可使用 `docker run --rm -v last30days_last30days-data:/data -v "$PWD":/backup alpine tar czf /backup/last30days-data.tar.gz /data`。
+
+### 正式网域部署
+
+在 `.env` 设置可公开解析到服务器的 `DOMAIN` 后执行：
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+```
+
+Caddy 会申请 HTTPS 并把流量转发到应用。请勿将 `.env` 提交到 Git；平台 API key 只应存于部署环境的 secret 或 `.env` 中。
+
+工作台提供共享密码登录、CSRF 保护、任务进度、取消、30 天历史以及 JSON、Markdown 和独立 HTML 报告下载。它不提供 LLM 对话或公开采集 API；使用前仍须遵守各平台条款和本项目的研究用途限制。
+
+---
+
 ## 📊 评分系统
 
 每条搜索结果的综合评分（0-100）基于：
